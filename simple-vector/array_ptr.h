@@ -32,7 +32,7 @@ public:
             raw_ptr_ = nullptr;
         }
         else {
-       raw_ptr_ = new Type[size];
+        raw_ptr_ = new Type[size];
         }
       
     }
