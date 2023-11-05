@@ -9,7 +9,8 @@
 #include <iterator>
 
 struct ReserveProxyObj
-{ 
+{
+    
     ReserveProxyObj(size_t cap) : capacity(cap) {}
    
     size_t capacity;
@@ -23,6 +24,8 @@ public:
     using ConstIterator = const Type*;
 
     SimpleVector() noexcept : size_(0), capacity_(0), arr_(nullptr) {}
+
+   
 
     // Создаёт вектор из size элементов, инициализированных значением по умолчанию
     explicit SimpleVector(size_t size) : size_(size), capacity_(size), arr_(ArrayPtr<Type>(size)) { 
@@ -46,15 +49,15 @@ public:
             arr_.swap(new_arr_);
         }
         else {
-        size_ = init.size();
-        ArrayPtr<Type> new_arr_(size_); // инициализация поля arr_ значением nullptr
-        arr_.swap(new_arr_);
-        size_t clock = 0;
-        for (auto memb: init) {
-            arr_[clock] = memb;
-            clock++;
-        }
-        capacity_  = size_;
+            size_ = init.size();
+            ArrayPtr<Type> new_arr_(size_); // инициализация поля arr_ значением nullptr
+            arr_.swap(new_arr_);
+            size_t clock = 0;
+            for (auto memb: init) {
+                arr_[clock] = memb;
+                clock++;
+            }
+            capacity_  = size_;
         }
     }
 
@@ -97,7 +100,7 @@ public:
     // Выбрасывает исключение std::out_of_range, если index >= size
     Type& At(size_t index) {
         if (index >= size_) {
-            throw std::out_of_range ("Simple_Vector - 100, At");;
+            throw std::out_of_range ("Simple_Vector - 108");;
         }
         else {
             return arr_[index];
@@ -108,7 +111,7 @@ public:
     // Выбрасывает исключение std::out_of_range, если index >= size
     const Type& At(size_t index) const {
         if (index >= size_) {
-            throw std::out_of_range ("Simple_Vector - 111, const At");;
+            throw std::out_of_range ("Simple_Vector - 119");;
         }
         else {
             return arr_[index];
@@ -125,39 +128,38 @@ public:
     // При увеличении размера новые элементы получают значение по умолчанию для типа Type
     void Resize(size_t new_size) { 
     size_t result_size;
-    
-    // Пытался придумать как это обойти по-другому, но при каждом решении тестирование падало
+    // Пытался придумать как это обойти, но при каждом решении тестирование просто падало
     if ((new_size < size_) || (capacity_ > new_size)) { 
-           result_size = new_size;
-        }
-    else 
-        if (capacity_ > new_size) { 
-            auto temp_old_size_ = size_; 
-            //result_size = new_size; 
-            //Iterator beginn = arr_.Get(); 
-            // Iterator endd = &arr_[static_cast<int>(size_)]; 
-            for (auto i = arr_.Get() + temp_old_size_; i != arr_.Get() + result_size; i++) { 
-                *i = Type{}; 
-            } 
-           // std::fill(beginn + temp_old_size_, beginn + size_, Type{}); 
+       result_size = new_size;
+    }
+
+    else if (capacity_ > new_size) { 
+        auto temp_old_size_ = size_; 
+        //result_size = new_size; 
+        Iterator beginn = arr_.Get(); 
+        // Iterator endd = &arr_[static_cast<int>(size_)]; 
+        for (auto i = beginn + temp_old_size_; i != beginn + result_size; i++) { 
+            *i = Type{}; 
         } 
-        else { 
-            Type* new_arr_ = new Type[new_size]; 
-            //Iterator beginn = arr_.Get(); 
-            //Iterator endd = &arr_[static_cast<int>(size_)];  
-            std::move(arr_.Get(), arr_.Get() + size_, new_arr_); 
-            for (auto i = new_arr_ + size_; i != new_arr_+new_size; i++) { 
-                *i = Type{}; 
-            } 
-            //std::fill(new_arr_ + size_, new_arr_+new_size, Type{}); 
-            capacity_ = std::max(capacity_*2, new_size); 
-            result_size = new_size; 
-            ArrayPtr<Type> new_arr2_(std::move(new_arr_)); 
-            arr_.swap(new_arr2_); 
-             
-        } 
-        size_ = result_size;
+       // std::fill(beginn + temp_old_size_, beginn + size_, Type{}); 
     } 
+    else { 
+        Type* new_arr_ = new Type[new_size]; 
+        Iterator beginn = arr_.Get(); 
+        //Iterator endd = &arr_[static_cast<int>(size_)];  
+        std::move(beginn, beginn + size_, new_arr_); 
+        for (auto i = new_arr_ + size_; i != new_arr_+new_size; i++) { 
+            *i = Type{}; 
+        } 
+        //std::fill(new_arr_ + size_, new_arr_+new_size, Type{}); 
+        capacity_ = std::max(capacity_*2, new_size); 
+        result_size = new_size; 
+        ArrayPtr<Type> new_arr2_(std::move(new_arr_)); 
+        arr_.swap(new_arr2_); 
+         
+    } 
+    size_ = result_size;
+} 
 
     // Возвращает итератор на начало массива
     // Для пустого массива может быть равен (или не равен) nullptr
@@ -246,7 +248,7 @@ public:
        }
        else {
             if (capacity_ > 0) {
-            capacity_ *= 2;
+                capacity_ *= 2;
             }
             else {
                 capacity_ = 1;
@@ -260,14 +262,16 @@ public:
        }
     }
 
+
+
     void PushBack(Type&& item) {
        if (size_ < capacity_) {
         arr_[size_]  = std::move(item);
         size_++;
        }
        else {
-             if (capacity_ > 0) {
-            capacity_ *= 2;
+            if (capacity_ > 0) {
+                capacity_ *= 2;
             }
             else {
                 capacity_ = 1;
@@ -288,14 +292,12 @@ public:
     Iterator Insert(ConstIterator pos, const Type& value) noexcept {
         assert (pos >= cbegin() && pos <= cend());
         auto save_pos = pos - cbegin();
-        size_t save_size = size_;
         if (size_ == capacity_) {
             if (capacity_ > 0) {
                 this->Resize(capacity_ * 2);
             } else {
                 this->Resize(1);
             }
-            size_ = save_size;
         }
 
         Iterator lpos(const_cast<Type*>(cbegin() + save_pos));
@@ -305,7 +307,7 @@ public:
         return lpos;
     }
 
-
+// Если убрать сохранение размера, падают тесты
     Iterator Insert(ConstIterator pos, Type&& value) noexcept {
         auto save_pos = pos - cbegin();
         size_t save_size = size_;
@@ -334,8 +336,8 @@ public:
 
     // Удаляет элемент вектора в указанной позиции
     Iterator Erase(ConstIterator pos) {
-      int index = pos - arr_.Get();
-      assert(index < static_cast<int>(size_));
+      int index = pos - cbegin();
+      assert((pos >= cbegin()) && (pos < cend()));
       std::move(arr_.Get() + index + 1, arr_.Get() + size_, arr_.Get() + index);
       assert(size_ != 0);
       size_--;
@@ -393,18 +395,17 @@ inline bool operator<(const SimpleVector<Type>& lhs, const SimpleVector<Type>& r
 
 template <typename Type>
 inline bool operator<=(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-   return !(lhs < rhs);
+   return !(rhs < lhs);
 }
 
 template <typename Type>
 inline bool operator>(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-// Не понял как можно реализовать только за счет <
-    return !(lhs <= rhs);
+    return rhs < lhs;
 }
 
 template <typename Type>
 inline bool operator>=(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-    return !(rhs < lhs);
+    return !(lhs < rhs);
 } 
 
 ReserveProxyObj Reserve(size_t capacity_to_reserve) {
