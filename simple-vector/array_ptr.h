@@ -1,7 +1,4 @@
 // вставьте сюда ваш код для класса ArrayPtr
-// внесите в него изменения, 
-// которые позволят реализовать move-семантику
-// вставьте сюда ваш код для класса ArrayPtr
 // внесиnте в него изменения, 
 // которые позволят реализовать move-семантику
 #include <cassert>
@@ -13,9 +10,8 @@ public:
     // Инициализирует ArrayPtr нулевым указателем
     ArrayPtr() = default;
     
-    // Конструктор перемещения
-    ArrayPtr(ArrayPtr&& other) noexcept {
-        raw_ptr_ = other.raw_ptr_;
+    ArrayPtr(ArrayPtr&& other) noexcept 
+        : raw_ptr_(std::move(other.raw_ptr_)) {
         other.raw_ptr_ = nullptr;
     }
 
@@ -23,7 +19,7 @@ public:
     ArrayPtr& operator=(ArrayPtr&& other) noexcept {
         if (this != &other) {
             delete [] raw_ptr_;
-            raw_ptr_ = other.raw_ptr_;
+            raw_ptr_ = std::move(other.raw_ptr_);
             other.raw_ptr_ = nullptr;
         }
         return *this;
